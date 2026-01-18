@@ -261,7 +261,12 @@
             }).filter(n => n !== null);
           };
 
-          const handleKeyPress = (key) => {
+          const handleKeyPress = async (key) => {
+            // Resume AudioContext if suspended
+            if (audioContextRef.current && audioContextRef.current.state === 'suspended') {
+              await audioContextRef.current.resume();
+            }
+            
             playNote(key.freq);
             setActiveKey(key.note);
             setTimeout(() => setActiveKey(null), 200);
@@ -307,7 +312,12 @@
             });
           };
 
-          const handlePlay = () => {
+          const handlePlay = async () => {
+            // Resume AudioContext if suspended
+            if (audioContextRef.current && audioContextRef.current.state === 'suspended') {
+              await audioContextRef.current.resume();
+            }
+            
             const sheet = selectedSong && savedSheets[selectedSong] ? savedSheets[selectedSong] : customSheet;
             if (sheet) {
               playSong(sheet);
@@ -347,11 +357,11 @@
             React.createElement('div', { className: 'max-w-7xl mx-auto relative z-10' },
               React.createElement('h1', { 
                 className: 'text-2xl sm:text-3xl md:text-5xl font-bold text-white text-center mb-3 sm:mb-4 md:mb-8 drop-shadow-lg' 
-              }, '🎹 Piano Playable BY RIKKU'),
+              }, 'Piano Playable BY RIKKU'),
 
               React.createElement('div', { className: 'grid grid-cols-1 md:grid-cols-2 gap-2 sm:gap-4 mb-3 sm:mb-4' },
                 React.createElement('div', { className: 'bg-white/20 backdrop-blur-lg rounded-lg sm:rounded-xl p-3 sm:p-4 shadow-xl' },
-                  React.createElement('h2', { className: 'text-white text-base sm:text-lg font-semibold mb-2 sm:mb-3' }, '📝 Virtual Piano Converter'),
+                  React.createElement('h2', { className: 'text-white text-base sm:text-lg font-semibold mb-2 sm:mb-3' }, 'Virtual Piano Converter 💔'),
                   React.createElement('textarea', {
                     value: virtualPianoInput,
                     onChange: (e) => setVirtualPianoInput(e.target.value),
@@ -362,11 +372,11 @@
                     onClick: handleVirtualPianoConvert,
                     disabled: !virtualPianoInput.trim(),
                     className: 'w-full px-3 sm:px-4 py-2 sm:py-2.5 bg-purple-500 hover:bg-purple-600 disabled:bg-gray-500 disabled:cursor-not-allowed text-white rounded-lg font-semibold text-sm sm:text-base shadow-lg'
-                  }, '🔄 Convert & Load 😹')
+                  }, 'Convert & Load 😹')
                 ),
 
                 React.createElement('div', { className: 'bg-white/20 backdrop-blur-lg rounded-lg sm:rounded-xl p-3 sm:p-4 shadow-xl' },
-                  React.createElement('h2', { className: 'text-white text-base sm:text-lg font-semibold mb-2 sm:mb-3' }, '💾 Sheets yg lu save'),
+                  React.createElement('h2', { className: 'text-white text-base sm:text-lg font-semibold mb-2 sm:mb-3' }, 'Sheets yg lu save 🥀'),
                   
                   Object.keys(savedSheets).length === 0 ? 
                     React.createElement('div', { className: 'text-white/70 text-center py-6 sm:py-8 text-xs sm:text-sm' }, 'Kosong wak 🥀') :
@@ -384,7 +394,7 @@
                           React.createElement('button', {
                             onClick: () => deleteSheet(name),
                             className: 'p-1.5 sm:p-2 bg-red-500 hover:bg-red-600 text-white rounded text-sm'
-                          }, '🗑️')
+                          }, 'Hapus')
                         )
                       )
                     ),
@@ -394,18 +404,18 @@
                       onClick: handlePlay,
                       disabled: isPlaying,
                       className: 'flex-1 px-3 sm:px-4 py-2 sm:py-2.5 bg-green-500 hover:bg-green-600 disabled:bg-gray-500 disabled:cursor-not-allowed text-white rounded-lg font-semibold text-sm sm:text-base shadow-lg'
-                    }, '▶️ Play'),
+                    }, 'Play 😹'),
                     React.createElement('button', {
                       onClick: stopPlayback,
                       disabled: !isPlaying,
                       className: 'px-3 sm:px-4 py-2 sm:py-2.5 bg-red-500 hover:bg-red-600 disabled:bg-gray-500 disabled:cursor-not-allowed text-white rounded-lg font-semibold text-sm sm:text-base shadow-lg'
-                    }, '⏹️ Stop')
+                    }, 'Stop 💔')
                   )
                 )
               ),
 
               React.createElement('div', { className: 'bg-white/20 backdrop-blur-lg rounded-lg sm:rounded-xl p-3 sm:p-4 shadow-xl mb-3 sm:mb-4' },
-                React.createElement('h2', { className: 'text-white text-base sm:text-lg font-semibold mb-2 sm:mb-3' }, '✏️ Custom Sheet Editor'),
+                React.createElement('h2', { className: 'text-white text-base sm:text-lg font-semibold mb-2 sm:mb-3' }, 'Custom Sheet Editor 💔'),
                 React.createElement('textarea', {
                   value: customSheet,
                   onChange: (e) => { setCustomSheet(e.target.value); setSelectedSong(''); },
@@ -426,7 +436,7 @@
                     onClick: saveSheet,
                     disabled: !newSheetName || !customSheet,
                     className: 'px-3 sm:px-4 py-1.5 sm:py-2 bg-blue-500 hover:bg-blue-600 disabled:bg-gray-500 disabled:cursor-not-allowed text-white rounded-lg font-semibold text-xs sm:text-sm shadow-lg'
-                  }, '💾 Save')
+                  }, 'Save 🥀')
                 )
               ),
 
@@ -466,11 +476,11 @@
               ),
 
               React.createElement('div', { className: 'bg-white/20 backdrop-blur-lg rounded-lg sm:rounded-xl p-3 sm:p-4 text-white text-xs sm:text-sm shadow-xl' },
-                React.createElement('h3', { className: 'font-semibold mb-2 text-sm sm:text-base' }, '📖 Cara Pakai'),
+                React.createElement('h3', { className: 'font-semibold mb-2 text-sm sm:text-base' }, 'Cara Pakai 😹'),
                 React.createElement('p', { className: 'mb-1 sm:mb-2' }, '• Format: Note-Durasi gitu sih 😹 (contoh: C4-500 E4-500)'),
                 React.createElement('p', { className: 'mb-1 sm:mb-2' }, '• Pake keyboard aja bro 😹 (A-L kalo di PC)'),
                 React.createElement('p', { className: 'mb-1 sm:mb-2' }, '• Durasi pake milidetik ya 🥀 (500 = setengah detik)'),
-                React.createElement('p', { className: 'mb-2 sm:mb-3' }, '• Bisa langsung paste Virtual Piano format terus auto convert! 🎹'),
+                React.createElement('p', { className: 'mb-2 sm:mb-3' }, '• Bisa langsung paste Virtual Piano format terus auto convert 💔'),
                 React.createElement('div', { className: 'mt-2 sm:mt-3 p-2 sm:p-3 bg-green-500/30 rounded-lg border border-green-400/50' },
                   React.createElement('p', { className: 'font-semibold mb-1' }, 'Cobain deh ini 😹:'),
                   React.createElement('code', { className: 'text-xs block bg-black/30 p-2 rounded overflow-x-auto' }, 
