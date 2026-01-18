@@ -195,61 +195,61 @@ const AnimeAIChatbot = () => {
         <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-fuchsia-600/5 rounded-full blur-3xl animate-pulse" style={{ animationDelay: '1s' }}></div>
       </div>
 
-      <div className="container mx-auto max-w-4xl h-screen flex flex-col p-4 relative z-10">
+      <div className="container mx-auto max-w-4xl min-h-screen flex flex-col p-2 sm:p-4 relative z-10">
         
         {/* Header */}
-        <div className="rounded-t-3xl p-6 shadow-2xl bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 border-b border-fuchsia-500/20">
+        <div className="rounded-t-3xl p-4 sm:p-6 shadow-2xl bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 border-b border-fuchsia-500/20">
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3 sm:gap-4">
               <div className="relative">
                 <img 
                   src={profileImage}
                   alt="Rikku-san"
-                  className="w-16 h-16 rounded-full shadow-xl border-2 border-fuchsia-500/50 object-cover bg-black"
+                  className="w-12 h-12 sm:w-16 sm:h-16 rounded-full shadow-xl border-2 border-fuchsia-500/50 object-cover bg-black"
                 />
-                <div className="absolute -bottom-1 -right-1 w-5 h-5 bg-green-500 rounded-full border-2 border-black animate-pulse"></div>
+                <div className="absolute -bottom-1 -right-1 w-4 h-4 sm:w-5 sm:h-5 bg-green-500 rounded-full border-2 border-black animate-pulse"></div>
               </div>
               <div>
-                <h1 className="text-2xl font-bold text-white flex items-center gap-2">
+                <h1 className="text-xl sm:text-2xl font-bold text-white flex items-center gap-2">
                   Rikku-san
-                  <Sparkles className="w-5 h-5 text-fuchsia-300" />
+                  <Sparkles className="w-4 h-4 sm:w-5 sm:h-5 text-fuchsia-300" />
                 </h1>
-                <p className="text-fuchsia-200 text-sm font-medium">AI Assistant</p>
-                <p className="text-fuchsia-300 text-xs">Web Search • Image Gen • Calculator</p>
+                <p className="text-fuchsia-200 text-xs sm:text-sm font-medium">AI Assistant</p>
+                <p className="text-fuchsia-300 text-xs hidden sm:block">Web Search • Image Gen • Calculator</p>
               </div>
             </div>
             
-            <div className="flex gap-2">
+            <div className="flex gap-1 sm:gap-2">
               <button
                 onClick={() => setSoundEnabled(!soundEnabled)}
-                className={`p-3 rounded-full transition-all backdrop-blur-sm border ${
+                className={`p-2 sm:p-3 rounded-full transition-all backdrop-blur-sm border ${
                   soundEnabled 
                     ? 'bg-fuchsia-600/40 border-fuchsia-400/50' 
                     : 'bg-black/40 border-fuchsia-500/30'
                 }`}
                 title="Toggle Sound"
               >
-                <Sparkles className="text-fuchsia-300 w-5 h-5" />
+                <Sparkles className="text-fuchsia-300 w-4 h-4 sm:w-5 sm:h-5" />
               </button>
               <button
                 onClick={clearChat}
-                className="p-3 rounded-full bg-black/40 hover:bg-black/60 transition-all backdrop-blur-sm border border-fuchsia-500/30 hover:border-fuchsia-400/50"
+                className="p-2 sm:p-3 rounded-full bg-black/40 hover:bg-black/60 transition-all backdrop-blur-sm border border-fuchsia-500/30 hover:border-fuchsia-400/50"
                 title="Clear Chat"
               >
-                <Trash2 className="text-fuchsia-300 w-5 h-5" />
+                <Trash2 className="text-fuchsia-300 w-4 h-4 sm:w-5 sm:h-5" />
               </button>
             </div>
           </div>
         </div>
 
         {/* Messages Area */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-black/60 backdrop-blur-sm border-x border-fuchsia-900/20">
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 bg-black/60 backdrop-blur-sm border-x border-fuchsia-900/20" style={{ minHeight: '400px', maxHeight: 'calc(100vh - 300px)' }}>
           {messages.map((message, index) => (
             <div
               key={index}
               className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'} animate-fadeIn`}
             >
-              <div className={`max-w-[80%] ${message.role === 'user' ? 'order-2' : 'order-1'}`}>
+              <div className={`max-w-[85%] sm:max-w-[80%] ${message.role === 'user' ? 'order-2' : 'order-1'}`}>
                 <div
                   className={`rounded-2xl p-4 shadow-xl border ${
                     message.role === 'user'
@@ -305,15 +305,15 @@ const AnimeAIChatbot = () => {
         </div>
 
         {/* Input Area */}
-        <div className="rounded-b-3xl p-4 shadow-2xl bg-black/80 backdrop-blur-md border border-t-0 border-fuchsia-900/20">
-          <div className="flex gap-3">
+        <div className="rounded-b-3xl p-3 sm:p-4 shadow-2xl bg-black/80 backdrop-blur-md border border-t-0 border-fuchsia-900/20">
+          <div className="flex gap-2 sm:gap-3">
             <input
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyPress={handleKeyPress}
-              placeholder="Type your message... *waiting patiently*"
-              className="flex-1 px-6 py-3 rounded-full outline-none transition-all bg-gray-900/80 text-white placeholder-gray-500 focus:ring-2 focus:ring-fuchsia-500/50 border border-fuchsia-800/30"
+              placeholder="Type your message..."
+              className="flex-1 px-4 sm:px-6 py-2 sm:py-3 rounded-full outline-none transition-all bg-gray-900/80 text-white placeholder-gray-500 focus:ring-2 focus:ring-fuchsia-500/50 border border-fuchsia-800/30 text-sm sm:text-base"
             />
             <button
               onClick={handleSend}
