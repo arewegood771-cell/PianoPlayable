@@ -38,8 +38,8 @@ const Piano = () => {
       for(let i=0;i<notes.length;i++){
         const note = notes[i];
         const isWhite = !note.includes('#');
-        const freq = 440 * Math.pow(2, octave-4 + (i-9)/12);
-        keys.push({note:note+octave,freq:white===true?freq:freq,white:isWhite});
+        const freq = 440 * Math.pow(2, (octave - 4) + (i - 9)/12);
+        keys.push({ note: note+octave, freq: freq, white: isWhite });
       }
     }
     return keys;
