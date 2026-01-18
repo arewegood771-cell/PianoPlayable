@@ -56,20 +56,27 @@
           const [selectedSong, setSelectedSong] = React.useState('');
           const [customSheet, setCustomSheet] = React.useState('');
           const [virtualPianoInput, setVirtualPianoInput] = React.useState('');
-          const [activeKey, setActiveKey] = React.useState(null);
+          const [activeKeys, setActiveKeys] = React.useState(new Set());
           const [savedSheets, setSavedSheets] = React.useState({});
           const [newSheetName, setNewSheetName] = React.useState('');
+          const [pressedKeys, setPressedKeys] = React.useState(new Set());
           const audioContextRef = React.useRef(null);
           const timeoutsRef = React.useRef([]);
+          const activeOscillatorsRef = React.useRef({});
 
+          // Full keyboard mapping - 3 octaves
           const keyboardMap = {
-            'a': 'C4', 'w': 'C#4', 's': 'D4', 'e': 'D#4', 'd': 'E4',
-            'f': 'F4', 't': 'F#4', 'g': 'G4', 'y': 'G#4', 'h': 'A4',
-            'u': 'A#4', 'j': 'B4', 'k': 'C5', 'o': 'C#5', 'l': 'D5',
-            'p': 'D#5', ';': 'E5', "'": 'F5'
+            // Octave 3
+            'z': 'C3', 's': 'C#3', 'x': 'D3', 'd': 'D#3', 'c': 'E3',
+            'v': 'F3', 'g': 'F#3', 'b': 'G3', 'h': 'G#3', 'n': 'A3', 'j': 'A#3', 'm': 'B3',
+            // Octave 4
+            'q': 'C4', '2': 'C#4', 'w': 'D4', '3': 'D#4', 'e': 'E4',
+            'r': 'F4', '5': 'F#4', 't': 'G4', '6': 'G#4', 'y': 'A4', '7': 'A#4', 'u': 'B4',
+            // Octave 5
+            'i': 'C5', '9': 'C#5', 'o': 'D5', '0': 'D#5', 'p': 'E5',
+            '[': 'F5', '=': 'F#5', ']': 'G5'
           };
 
-          // Virtual Piano note mapping
           const virtualPianoMap = {
             '1': 'C', '!': 'C#', 'q': 'C#', '2': 'D', '@': 'D#', 'w': 'D#',
             '3': 'E', '4': 'F', '$': 'F#', 'r': 'F#', '5': 'G', '%': 'G#',
@@ -92,7 +99,6 @@
             while (i < input.length) {
               const char = input[i];
               
-              // Check for bracket notation [4o]
               if (char === '[') {
                 const closeIdx = input.indexOf(']', i);
                 if (closeIdx !== -1) {
@@ -114,7 +120,6 @@
                 }
               }
               
-              // Regular note
               if (virtualPianoMap[char]) {
                 output.push(`${virtualPianoMap[char]}${currentOctave}-${defaultDuration}`);
               }
@@ -129,11 +134,7 @@
             const notes = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
             const keys = [];
             
-            keys.push({ note: 'A0', freq: 27.50, white: true });
-            keys.push({ note: 'A#0', freq: 29.14, white: false });
-            keys.push({ note: 'B0', freq: 30.87, white: true });
-            
-            for (let octave = 1; octave <= 8; octave++) {
+            for (let octave = 2; octave <= 6; octave++) {
               for (let i = 0; i < notes.length; i++) {
                 const note = notes[i];
                 const isWhite = !note.includes('#');
@@ -143,7 +144,6 @@
                   freq: freq, 
                   white: isWhite
                 });
-                if (octave === 8 && note === 'C') break;
               }
             }
             
@@ -161,25 +161,49 @@
             loadSavedSheets();
             
             const handleKeyDown = (e) => {
+              if (e.repeat) return;
+              
               const key = e.key.toLowerCase();
               if (keyboardMap[key] && !isPlaying) {
+                if (!pressedKeys.has(key)) {
+                  const newPressed = new Set(pressedKeys);
+                  newPressed.add(key);
+                  setPressedKeys(newPressed);
+                  
+                  const pianoKey = allKeys.find(k => k.note === keyboardMap[key]);
+                  if (pianoKey) {
+                    startNote(pianoKey);
+                  }
+                }
+              }
+            };
+
+            const handleKeyUp = (e) => {
+              const key = e.key.toLowerCase();
+              if (keyboardMap[key]) {
+                const newPressed = new Set(pressedKeys);
+                newPressed.delete(key);
+                setPressedKeys(newPressed);
+                
                 const pianoKey = allKeys.find(k => k.note === keyboardMap[key]);
                 if (pianoKey) {
-                  handleKeyPress(pianoKey);
+                  stopNote(pianoKey);
                 }
               }
             };
 
             window.addEventListener('keydown', handleKeyDown);
+            window.addEventListener('keyup', handleKeyUp);
             
             return () => {
               stopPlayback();
               window.removeEventListener('keydown', handleKeyDown);
+              window.removeEventListener('keyup', handleKeyUp);
               if (audioContextRef.current) {
                 audioContextRef.current.close();
               }
             };
-          }, [isPlaying]);
+          }, [isPlaying, pressedKeys]);
 
           const loadSavedSheets = () => {
             try {
@@ -213,7 +237,63 @@
             }
           };
 
-          const playNote = (frequency, duration) => {
+          const startNote = (key) => {
+            if (activeOscillatorsRef.current[key.note]) return;
+            
+            const ctx = audioContextRef.current;
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            const filter = ctx.createBiquadFilter();
+            const compressor = ctx.createDynamicsCompressor();
+
+            osc.connect(filter);
+            filter.connect(gain);
+            gain.connect(compressor);
+            compressor.connect(ctx.destination);
+
+            osc.frequency.value = key.freq;
+            osc.type = 'sine';
+            
+            filter.type = 'lowpass';
+            filter.frequency.value = key.freq * 3;
+            filter.Q.value = 1;
+
+            gain.gain.setValueAtTime(0, ctx.currentTime);
+            gain.gain.linearRampToValueAtTime(0.3, ctx.currentTime + 0.01);
+            gain.gain.exponentialRampToValueAtTime(0.2, ctx.currentTime + 0.1);
+
+            osc.start(ctx.currentTime);
+
+            activeOscillatorsRef.current[key.note] = { osc, gain };
+            
+            const newActive = new Set(activeKeys);
+            newActive.add(key.note);
+            setActiveKeys(newActive);
+          };
+
+          const stopNote = (key) => {
+            const oscillator = activeOscillatorsRef.current[key.note];
+            if (!oscillator) return;
+
+            const ctx = audioContextRef.current;
+            const { osc, gain } = oscillator;
+
+            gain.gain.cancelScheduledValues(ctx.currentTime);
+            gain.gain.setValueAtTime(gain.gain.value, ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+
+            osc.stop(ctx.currentTime + 0.3);
+            
+            setTimeout(() => {
+              delete activeOscillatorsRef.current[key.note];
+            }, 350);
+
+            const newActive = new Set(activeKeys);
+            newActive.delete(key.note);
+            setActiveKeys(newActive);
+          };
+
+          const playNoteOnce = (frequency, duration) => {
             duration = duration || 300;
             const ctx = audioContextRef.current;
             const osc = ctx.createOscillator();
@@ -225,15 +305,15 @@
             gain.connect(ctx.destination);
 
             osc.frequency.value = frequency;
-            osc.type = 'triangle';
+            osc.type = 'sine';
             filter.type = 'lowpass';
-            filter.frequency.value = frequency * 4;
+            filter.frequency.value = frequency * 3;
 
             const release = duration / 1000;
             gain.gain.setValueAtTime(0, ctx.currentTime);
-            gain.gain.linearRampToValueAtTime(0.5, ctx.currentTime + 0.002);
-            gain.gain.linearRampToValueAtTime(0.3, ctx.currentTime + 0.1);
-            gain.gain.linearRampToValueAtTime(0, ctx.currentTime + release);
+            gain.gain.linearRampToValueAtTime(0.3, ctx.currentTime + 0.01);
+            gain.gain.exponentialRampToValueAtTime(0.2, ctx.currentTime + 0.1);
+            gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + release);
 
             osc.start(ctx.currentTime);
             osc.stop(ctx.currentTime + release);
@@ -250,17 +330,26 @@
             }).filter(n => n !== null);
           };
 
-          const handleKeyPress = (key) => {
-            playNote(key.freq);
-            setActiveKey(key.note);
-            setTimeout(() => setActiveKey(null), 200);
+          const handleMouseDown = (key) => {
+            startNote(key);
+          };
+
+          const handleMouseUp = (key) => {
+            stopNote(key);
+          };
+
+          const handleMouseLeave = (key) => {
+            if (activeKeys.has(key.note)) {
+              stopNote(key);
+            }
           };
 
           const stopPlayback = () => {
             setIsPlaying(false);
             timeoutsRef.current.forEach(t => clearTimeout(t));
             timeoutsRef.current = [];
-            setActiveKey(null);
+            const newActive = new Set();
+            setActiveKeys(newActive);
           };
 
           const playSong = (sheet) => {
@@ -284,9 +373,15 @@
               const key = allKeys.find(k => k.note === item.note);
               const timeout = setTimeout(() => {
                 if (key) {
-                  playNote(key.freq, item.duration);
-                  setActiveKey(item.note);
-                  setTimeout(() => setActiveKey(null), item.duration);
+                  playNoteOnce(key.freq, item.duration);
+                  const newActive = new Set(activeKeys);
+                  newActive.add(item.note);
+                  setActiveKeys(newActive);
+                  setTimeout(() => {
+                    const newActive2 = new Set(activeKeys);
+                    newActive2.delete(item.note);
+                    setActiveKeys(newActive2);
+                  }, item.duration);
                 }
                 if (i === songNotes.length - 1) setIsPlaying(false);
               }, delay);
@@ -426,8 +521,12 @@
                     return key.white ?
                       React.createElement('button', {
                         key: key.note,
-                        onClick: () => handleKeyPress(key),
-                        className: 'relative border-2 border-gray-800 rounded-b-lg transition-all shadow-lg ' + (activeKey === key.note ? 'bg-gradient-to-b from-yellow-300 to-yellow-500 scale-95' : 'bg-gradient-to-b from-white to-gray-200 hover:from-gray-100 hover:to-gray-300'),
+                        onMouseDown: () => handleMouseDown(key),
+                        onMouseUp: () => handleMouseUp(key),
+                        onMouseLeave: () => handleMouseLeave(key),
+                        onTouchStart: (e) => { e.preventDefault(); handleMouseDown(key); },
+                        onTouchEnd: (e) => { e.preventDefault(); handleMouseUp(key); },
+                        className: 'relative border-2 border-gray-800 rounded-b-lg transition-all shadow-lg select-none ' + (activeKeys.has(key.note) ? 'bg-gradient-to-b from-yellow-300 to-yellow-500 scale-95' : 'bg-gradient-to-b from-white to-gray-200 hover:from-gray-100 hover:to-gray-300'),
                         style: { width: isMobile ? '2.5rem' : '4rem', height: isMobile ? '8rem' : '16rem' }
                       },
                         React.createElement('div', { className: 'absolute left-0 right-0 text-center' , style: { bottom: isMobile ? '0.5rem' : '1rem' }},
@@ -437,8 +536,12 @@
                       ) :
                       React.createElement('button', {
                         key: key.note,
-                        onClick: () => handleKeyPress(key),
-                        className: 'absolute rounded-b-lg z-10 transition-all shadow-xl ' + (activeKey === key.note ? 'bg-gradient-to-b from-purple-500 to-purple-700 scale-95' : 'bg-gradient-to-b from-gray-900 to-black hover:from-gray-800 hover:to-gray-900'),
+                        onMouseDown: () => handleMouseDown(key),
+                        onMouseUp: () => handleMouseUp(key),
+                        onMouseLeave: () => handleMouseLeave(key),
+                        onTouchStart: (e) => { e.preventDefault(); handleMouseDown(key); },
+                        onTouchEnd: (e) => { e.preventDefault(); handleMouseUp(key); },
+                        className: 'absolute rounded-b-lg z-10 transition-all shadow-xl select-none ' + (activeKeys.has(key.note) ? 'bg-gradient-to-b from-purple-500 to-purple-700 scale-95' : 'bg-gradient-to-b from-gray-900 to-black hover:from-gray-800 hover:to-gray-900'),
                         style: { 
                           width: isMobile ? '1.75rem' : '2.75rem', 
                           height: isMobile ? '5rem' : '10rem',
@@ -457,8 +560,9 @@
               React.createElement('div', { className: 'bg-white/20 backdrop-blur-lg rounded-lg sm:rounded-xl p-3 sm:p-4 text-white text-xs sm:text-sm shadow-xl' },
                 React.createElement('h3', { className: 'font-semibold mb-2 text-sm sm:text-base' }, 'Cara Pakai 😹'),
                 React.createElement('p', { className: 'mb-1 sm:mb-2' }, '• Format: Note-Durasi gitu sih 😹 (contoh: C4-500 E4-500)'),
-                React.createElement('p', { className: 'mb-1 sm:mb-2' }, '• Pake keyboard aja bro 😹 (A-L kalo di PC)'),
-                React.createElement('p', { className: 'mb-1 sm:mb-2' }, '• Durasi pake milidetik ya 🥀 (500 = setengah detik)'),
+                React.createElement('p', { className: 'mb-1 sm:mb-2' }, '• Pake keyboard buat main - teken beberapa key sekaligus bisa! 💔'),
+                React.createElement('p', { className: 'mb-1 sm:mb-2' }, '• Keyboard layout: Z-M (octave 3), Q-U (octave 4), I-] (octave 5) 🥀'),
+                React.createElement('p', { className: 'mb-2 sm:mb-3' }, '• Durasi pake milidetik ya 🥀 (500 = setengah detik)'),
                 React.createElement('p', { className: 'mb-2 sm:mb-3' }, '• Bisa langsung paste Virtual Piano format terus auto convert 💔'),
                 React.createElement('div', { className: 'mt-2 sm:mt-3 p-2 sm:p-3 bg-green-500/30 rounded-lg border border-green-400/50' },
                   React.createElement('p', { className: 'font-semibold mb-1' }, 'Cobain deh ini 😹:'),
