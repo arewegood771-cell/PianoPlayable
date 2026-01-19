@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>🎲 Dice Guess Master</title>
+    <title>Clicker Fun</title>
     <style>
         * {
             margin: 0;
@@ -13,185 +13,127 @@
 
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #0c0fda;
             min-height: 100vh;
             display: flex;
             justify-content: center;
             align-items: center;
             padding: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .starfall {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            animation: fall linear infinite;
+        }
+
+        @keyframes fall {
+            to {
+                transform: translateY(100vh);
+                opacity: 0;
+            }
         }
 
         .container {
-            max-width: 1200px;
-            width: 100%;
-            display: grid;
-            grid-template-columns: 2fr 1fr;
-            gap: 20px;
-        }
-
-        .game-section, .leaderboard-section {
-            background: rgba(255, 255, 255, 0.95);
+            background: rgba(20, 20, 30, 0.95);
             border-radius: 20px;
-            padding: 30px;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-        }
-
-        h1 {
-            text-align: center;
-            color: #667eea;
-            margin-bottom: 20px;
-            font-size: 2.5em;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
-        }
-
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
-            margin-bottom: 30px;
-        }
-
-        .stat-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            padding: 20px;
-            border-radius: 15px;
-            text-align: center;
-            color: white;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-        }
-
-        .stat-label {
-            font-size: 0.9em;
-            opacity: 0.9;
-            margin-bottom: 5px;
-        }
-
-        .stat-value {
-            font-size: 2em;
-            font-weight: bold;
-        }
-
-        .dice-container {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin: 40px 0;
-            min-height: 150px;
-        }
-
-        .dice {
-            width: 120px;
-            height: 120px;
-            background: white;
-            border-radius: 15px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            font-size: 4em;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-            transition: transform 0.1s;
-        }
-
-        .dice.rolling {
-            animation: roll 0.5s ease-in-out;
-        }
-
-        @keyframes roll {
-            0%, 100% { transform: rotate(0deg); }
-            25% { transform: rotate(90deg) scale(1.1); }
-            50% { transform: rotate(180deg) scale(0.9); }
-            75% { transform: rotate(270deg) scale(1.1); }
-        }
-
-        .guess-buttons {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-
-        .guess-btn {
-            padding: 20px;
-            font-size: 2em;
-            border: none;
-            border-radius: 15px;
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            color: white;
-            cursor: pointer;
-            transition: all 0.3s;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-        }
-
-        .guess-btn:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
-        }
-
-        .guess-btn:active {
-            transform: translateY(0);
-        }
-
-        .guess-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        .result-message {
-            text-align: center;
-            font-size: 1.5em;
-            font-weight: bold;
-            margin: 20px 0;
-            min-height: 40px;
-            transition: all 0.3s;
-        }
-
-        .result-message.correct {
-            color: #10b981;
-            animation: bounce 0.5s;
-        }
-
-        .result-message.wrong {
-            color: #ef4444;
-            animation: shake 0.5s;
-        }
-
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
-        }
-
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            25% { transform: translateX(-10px); }
-            75% { transform: translateX(10px); }
-        }
-
-        .username-section {
-            margin-bottom: 20px;
-        }
-
-        .username-input {
+            box-shadow: 0 20px 60px rgba(138, 43, 226, 0.5);
+            max-width: 800px;
             width: 100%;
-            padding: 15px;
-            font-size: 1.1em;
-            border: 2px solid #667eea;
-            border-radius: 10px;
-            outline: none;
+            overflow: hidden;
+            position: relative;
+            z-index: 1;
+            border: 1px solid rgba(138, 43, 226, 0.3);
         }
 
-        .username-input:focus {
-            border-color: #764ba2;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+        .tabs {
+            display: flex;
+            background: rgba(30, 30, 45, 0.8);
+            border-bottom: 2px solid rgba(138, 43, 226, 0.5);
         }
 
-        h2 {
-            color: #667eea;
-            margin-bottom: 20px;
+        .tab {
+            flex: 1;
+            padding: 20px;
             text-align: center;
+            cursor: pointer;
+            font-weight: 600;
+            color: #9ca3af;
+            transition: all 0.3s;
+            border-bottom: 3px solid transparent;
+        }
+
+        .tab:hover {
+            background: rgba(50, 50, 70, 0.8);
+            color: #c4b5fd;
+        }
+
+        .tab.active {
+            color: #c4b5fd;
+            border-bottom-color: #8b5cf6;
+            background: rgba(40, 40, 60, 0.9);
+        }
+
+        .tab-content {
+            display: none;
+            padding: 40px;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .game-section {
+            text-align: center;
+        }
+
+        .score-display {
+            font-size: 48px;
+            font-weight: bold;
+            color: #c4b5fd;
+            margin-bottom: 30px;
+            text-shadow: 0 0 20px rgba(139, 92, 246, 0.8);
+        }
+
+        .click-button {
+            width: 200px;
+            height: 200px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
+            border: none;
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.1s;
+            box-shadow: 0 10px 30px rgba(139, 92, 246, 0.6), 0 0 40px rgba(139, 92, 246, 0.3);
+            margin: 20px auto;
+            display: block;
+        }
+
+        .click-button:active {
+            transform: scale(0.95);
+        }
+
+        .click-button:hover {
+            box-shadow: 0 15px 40px rgba(139, 92, 246, 0.8), 0 0 60px rgba(139, 92, 246, 0.5);
         }
 
         .leaderboard {
-            max-height: 500px;
+            max-height: 400px;
             overflow-y: auto;
         }
 
@@ -201,289 +143,397 @@
             align-items: center;
             padding: 15px;
             margin-bottom: 10px;
-            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            background: rgba(40, 40, 60, 0.6);
             border-radius: 10px;
-            color: white;
-            transition: transform 0.2s;
+            transition: all 0.3s;
+            border: 1px solid rgba(139, 92, 246, 0.2);
+            color: #e5e7eb;
         }
 
         .leaderboard-item:hover {
-            transform: scale(1.02);
+            background: rgba(24, 24, 209, 0.8);
+            transform: translateX(5px);
+            border-color: rgba(18, 112, 219, 0.5);
         }
 
-        .leaderboard-item:nth-child(1) {
-            background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
-            color: #333;
-        }
-
-        .leaderboard-item:nth-child(2) {
-            background: linear-gradient(135deg, #c0c0c0 0%, #e8e8e8 100%);
-            color: #333;
-        }
-
-        .leaderboard-item:nth-child(3) {
-            background: linear-gradient(135deg, #cd7f32 0%, #d4a574 100%);
-            color: #333;
-        }
-
-        .player-name {
+        .leaderboard-item.top-1 {
+            background: linear-gradient(135deg, rgba(255, 215, 0, 0.3) 0%, rgba(255, 237, 78, 0.3) 100%);
+            border: 2px solid #ffd700;
             font-weight: bold;
-            flex: 1;
+            color: #ffd700;
         }
 
-        .player-streak {
-            background: rgba(255, 255, 255, 0.3);
-            padding: 5px 15px;
-            border-radius: 20px;
+        .leaderboard-item.top-2 {
+            background: linear-gradient(135deg, rgba(192, 192, 192, 0.3) 0%, rgba(232, 232, 232, 0.3) 100%);
+            border: 2px solid #c0c0c0;
             font-weight: bold;
+            color: #e8e8e8;
+        }
+
+        .leaderboard-item.top-3 {
+            background: linear-gradient(135deg, rgba(205, 127, 50, 0.3) 0%, rgba(230, 168, 92, 0.3) 100%);
+            border: 2px solid #cd7f32;
+            font-weight: bold;
+            color: #e6a85c;
         }
 
         .rank {
-            width: 30px;
-            height: 30px;
-            background: rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
+            font-size: 20px;
             font-weight: bold;
-            margin-right: 10px;
+            margin-right: 15px;
+            min-width: 30px;
         }
 
-        .streak-fire {
-            display: inline-block;
-            margin-left: 5px;
+        .player-name {
+            flex: 1;
+            text-align: left;
         }
 
-        @media (max-width: 768px) {
-            .container {
-                grid-template-columns: 1fr;
-            }
+        .player-score {
+            font-weight: bold;
+            color: #c4b5fd;
+        }
 
-            .stats {
-                grid-template-columns: 1fr;
-            }
+        .account-section {
+            text-align: center;
+        }
 
-            .guess-buttons {
-                grid-template-columns: repeat(2, 1fr);
-            }
+        .input-group {
+            margin-bottom: 20px;
+        }
+
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #d1d5db;
+            text-align: left;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid rgba(139, 92, 246, 0.3);
+            background: rgba(30, 30, 45, 0.6);
+            color: #e5e7eb;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+
+        .input-group input:focus {
+            outline: none;
+            border-color: #8b5cf6;
+            box-shadow: 0 0 20px rgba(139, 92, 246, 0.3);
+        }
+
+        .btn {
+            padding: 12px 30px;
+            background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+            margin: 5px;
+            box-shadow: 0 5px 15px rgba(139, 92, 246, 0.4);
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(139, 92, 246, 0.6);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #4b5563 0%, #374151 100%);
+        }
+
+        .account-info {
+            background: rgba(40, 40, 60, 0.6);
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 20px;
+            border: 1px solid rgba(139, 92, 246, 0.3);
+        }
+
+        .account-info h3 {
+            color: #c4b5fd;
+            margin-bottom: 10px;
+        }
+
+        .account-info p {
+            color: #d1d5db;
+        }
+
+        .empty-state {
+            text-align: center;
+            color: #9ca3af;
+            padding: 40px;
+        }
+
+        h2 {
+            color: #e5e7eb;
+            margin-bottom: 20px;
+            text-shadow: 0 0 10px rgba(139, 92, 246, 0.5);
         }
     </style>
 </head>
 <body>
+    <div class="starfall" id="starfall"></div>
     <div class="container">
-        <div class="game-section">
-            <h1>🎲 Dice Guess Master</h1>
+        <div class="tabs">
+            <div class="tab active" onclick="switchTab('Play Game')">Game</div>
+            <div class="tab" onclick="switchTab('leaderboard Online(pajangan doang jir)')">Leaderboard</div>
+            <div class="tab" onclick="switchTab('Akun (Buat save click)')">Account</div>
+        </div>
 
-            <div class="username-section">
-                <input type="text" class="username-input" id="usernameInput" placeholder="Enter your username..." maxlength="20">
-            </div>
-
-            <div class="stats">
-                <div class="stat-card">
-                    <div class="stat-label">Current Streak</div>
-                    <div class="stat-value" id="currentStreak">0</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-label">Best Streak</div>
-                    <div class="stat-value" id="bestStreak">0</div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-label">Total Guesses</div>
-                    <div class="stat-value" id="totalGuesses">0</div>
-                </div>
-            </div>
-
-            <div class="dice-container">
-                <div class="dice" id="dice">🎲</div>
-            </div>
-
-            <div class="result-message" id="resultMessage"></div>
-
-            <div class="guess-buttons">
-                <button class="guess-btn" onclick="makeGuess(1)">1️⃣</button>
-                <button class="guess-btn" onclick="makeGuess(2)">2️⃣</button>
-                <button class="guess-btn" onclick="makeGuess(3)">3️⃣</button>
-                <button class="guess-btn" onclick="makeGuess(4)">4️⃣</button>
-                <button class="guess-btn" onclick="makeGuess(5)">5️⃣</button>
-                <button class="guess-btn" onclick="makeGuess(6)">6️⃣</button>
+        <div id="game" class="tab-content active">
+            <div class="game-section">
+                <h2>Clicker!</h2>
+                <div class="score-display" id="scoreDisplay">0</div>
+                <button class="click-button" id="clickButton">CLICK ME!</button>
+                <audio id="clickSound" src="https://www.myinstants.com/media/sounds/hidup-jokowi.mp3"></audio>
             </div>
         </div>
 
-        <div class="leaderboard-section">
-            <h2>🏆 Leaderboard</h2>
-            <div class="leaderboard" id="leaderboard"></div>
+        <div id="leaderboard" class="tab-content">
+            <h2>Real-Time Leaderboard</h2>
+            <div class="leaderboard" id="leaderboardList">
+                <div class="empty-state">Gaada Player</div>
+            </div>
+        </div>
+
+        <div id="account" class="tab-content">
+            <div class="account-section">
+                <div id="loginForm">
+                    <h2>Bikin Akun (biar data lu ke save)</h2>
+                    <div class="input-group">
+                        <label for="username">Username</label>
+                        <input type="text" id="username" placeholder="Enter your username">
+                    </div>
+                    <button class="btn" onclick="login()">Login</button>
+                </div>
+                <div id="accountInfo" style="display: none;">
+                    <h2>Your Account</h2>
+                    <div class="account-info">
+                        <h3 id="displayUsername"></h3>
+                        <p>Your Score: <strong id="displayScore">0</strong></p>
+                        <p>Your Rank: <strong id="displayRank">-</strong></p>
+                    </div>
+                    <button class="btn btn-secondary" onclick="logout()">Logout</button>
+                </div>
+            </div>
         </div>
     </div>
 
     <script>
-        const diceEmojis = ['⚀', '⚁', '⚂', '⚃', '⚄', '⚅'];
-        let currentRoll = 0;
-        let currentStreak = 0;
-        let bestStreak = 0;
-        let totalGuesses = 0;
-        let isRolling = false;
+        let score = 0;
+        let username = null;
 
-        // Load data from memory
-        function loadGameData() {
-            const data = {
-                currentStreak: parseInt(sessionStorage.getItem('currentStreak')) || 0,
-                bestStreak: parseInt(sessionStorage.getItem('bestStreak')) || 0,
-                totalGuesses: parseInt(sessionStorage.getItem('totalGuesses')) || 0,
-                username: sessionStorage.getItem('username') || ''
-            };
-            
-            currentStreak = data.currentStreak;
-            bestStreak = data.bestStreak;
-            totalGuesses = data.totalGuesses;
-            
-            if (data.username) {
-                document.getElementById('usernameInput').value = data.username;
+        // Load account from memory
+        function loadAccount() {
+            const saved = localStorage.getItem('jokowi_account');
+            if (saved) {
+                const data = JSON.parse(saved);
+                username = data.username;
+                score = data.score || 0;
+                updateDisplay();
+                showAccountInfo();
             }
-            
-            updateStats();
         }
 
-        // Save data to memory
-        function saveGameData() {
-            sessionStorage.setItem('currentStreak', currentStreak);
-            sessionStorage.setItem('bestStreak', bestStreak);
-            sessionStorage.setItem('totalGuesses', totalGuesses);
-            
-            const username = document.getElementById('usernameInput').value.trim();
+        // Save account to memory
+        function saveAccount() {
             if (username) {
-                sessionStorage.setItem('username', username);
+                localStorage.setItem('jokowi_account', JSON.stringify({
+                    username: username,
+                    score: score
+                }));
+                updateLeaderboard();
             }
         }
 
-        // Load/Save leaderboard
-        function loadLeaderboard() {
-            const saved = sessionStorage.getItem('leaderboard');
-            return saved ? JSON.parse(saved) : [];
-        }
-
-        function saveLeaderboard(leaderboard) {
-            sessionStorage.setItem('leaderboard', JSON.stringify(leaderboard));
-        }
-
-        function updateLeaderboard(username, streak) {
-            if (!username) return;
-            
-            let leaderboard = loadLeaderboard();
-            
-            const existingIndex = leaderboard.findIndex(p => p.name === username);
-            
-            if (existingIndex >= 0) {
-                if (streak > leaderboard[existingIndex].streak) {
-                    leaderboard[existingIndex].streak = streak;
-                }
-            } else {
-                leaderboard.push({ name: username, streak: streak });
-            }
-            
-            leaderboard.sort((a, b) => b.streak - a.streak);
-            leaderboard = leaderboard.slice(0, 10);
-            
-            saveLeaderboard(leaderboard);
-            displayLeaderboard();
-        }
-
-        function displayLeaderboard() {
-            const leaderboard = loadLeaderboard();
-            const container = document.getElementById('leaderboard');
-            
-            if (leaderboard.length === 0) {
-                container.innerHTML = '<p style="text-align: center; color: #999;">No players yet. Be the first!</p>';
+        // Click handler
+        document.getElementById('clickButton').addEventListener('click', function() {
+            if (!username) {
+                alert('Login dlu bit');
+                switchTab('account');
                 return;
             }
             
-            container.innerHTML = leaderboard.map((player, index) => {
-                const fire = player.streak >= 10 ? '🔥' : player.streak >= 5 ? '⭐' : '';
+            score++;
+            updateDisplay();
+            saveAccount();
+            
+            const audio = document.getElementById('clickSound');
+            audio.currentTime = 0;
+            audio.play().catch(e => console.log('Audio play failed:', e));
+        });
+
+        function updateDisplay() {
+            document.getElementById('scoreDisplay').textContent = score;
+            if (username) {
+                document.getElementById('displayScore').textContent = score;
+            }
+        }
+
+        function login() {
+            const input = document.getElementById('username').value.trim();
+            if (!input) {
+                alert('Enter u-username dulu~');
+                return;
+            }
+            
+            username = input;
+            
+            // Check if user exists in leaderboard
+            const leaderboard = getLeaderboard();
+            const existingUser = leaderboard.find(u => u.username === username);
+            if (existingUser) {
+                score = existingUser.score;
+            } else {
+                score = 0;
+            }
+            
+            saveAccount();
+            showAccountInfo();
+            updateDisplay();
+            switchTab('game');
+        }
+
+        function logout() {
+            username = null;
+            score = 0;
+            localStorage.removeItem('jokowi_account');
+            showLoginForm();
+            updateDisplay();
+        }
+
+        function showAccountInfo() {
+            document.getElementById('loginForm').style.display = 'none';
+            document.getElementById('accountInfo').style.display = 'block';
+            document.getElementById('displayUsername').textContent = username;
+            updateRankDisplay();
+        }
+
+        function showLoginForm() {
+            document.getElementById('loginForm').style.display = 'block';
+            document.getElementById('accountInfo').style.display = 'none';
+        }
+
+        function switchTab(tabName) {
+            const tabs = document.querySelectorAll('.tab');
+            const contents = document.querySelectorAll('.tab-content');
+            
+            tabs.forEach(tab => tab.classList.remove('active'));
+            contents.forEach(content => content.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById(tabName).classList.add('active');
+            
+            if (tabName === 'leaderboard') {
+                updateLeaderboard();
+            }
+        }
+
+        function getLeaderboard() {
+            const data = localStorage.getItem('jokowi_leaderboard');
+            return data ? JSON.parse(data) : [];
+        }
+
+        function saveLeaderboard(leaderboard) {
+            localStorage.setItem('jokowi_leaderboard', JSON.stringify(leaderboard));
+        }
+
+        function updateLeaderboard() {
+            let leaderboard = getLeaderboard();
+            
+            // Update or add current user
+            if (username) {
+                const index = leaderboard.findIndex(u => u.username === username);
+                if (index >= 0) {
+                    leaderboard[index].score = score;
+                } else {
+                    leaderboard.push({ username, score });
+                }
+            }
+            
+            // Sort by score
+            leaderboard.sort((a, b) => b.score - a.score);
+            
+            saveLeaderboard(leaderboard);
+            displayLeaderboard(leaderboard);
+            updateRankDisplay();
+        }
+
+        function displayLeaderboard(leaderboard) {
+            const list = document.getElementById('leaderboardList');
+            
+            if (leaderboard.length === 0) {
+                list.innerHTML = '<div class="empty-state">Belum ada player :(</div>';
+                return;
+            }
+            
+            list.innerHTML = leaderboard.map((player, index) => {
+                let className = 'leaderboard-item';
+                if (index === 0) className += ' top-1';
+                else if (index === 1) className += ' top-2';
+                else if (index === 2) className += ' top-3';
+                
                 return `
-                    <div class="leaderboard-item">
-                        <span class="rank">${index + 1}</span>
-                        <span class="player-name">${player.name}</span>
-                        <span class="player-streak">${player.streak}<span class="streak-fire">${fire}</span></span>
+                    <div class="${className}">
+                        <span class="rank">#${index + 1}</span>
+                        <span class="player-name">${player.username}</span>
+                        <span class="player-score">${player.score}</span>
                     </div>
                 `;
             }).join('');
         }
 
-        function updateStats() {
-            document.getElementById('currentStreak').textContent = currentStreak;
-            document.getElementById('bestStreak').textContent = bestStreak;
-            document.getElementById('totalGuesses').textContent = totalGuesses;
-        }
-
-        function rollDice() {
-            const dice = document.getElementById('dice');
-            dice.classList.add('rolling');
+        function updateRankDisplay() {
+            if (!username) return;
             
-            let rollCount = 0;
-            const rollInterval = setInterval(() => {
-                dice.textContent = diceEmojis[Math.floor(Math.random() * 6)];
-                rollCount++;
-                
-                if (rollCount >= 10) {
-                    clearInterval(rollInterval);
-                    currentRoll = Math.floor(Math.random() * 6) + 1;
-                    dice.textContent = diceEmojis[currentRoll - 1];
-                    dice.classList.remove('rolling');
-                    isRolling = false;
-                }
-            }, 50);
-        }
-
-        function makeGuess(guess) {
-            if (isRolling) return;
-            
-            const username = document.getElementById('usernameInput').value.trim();
-            if (!username) {
-                alert('Please enter your username first!');
-                document.getElementById('usernameInput').focus();
-                return;
-            }
-            
-            isRolling = true;
-            const resultMessage = document.getElementById('resultMessage');
-            resultMessage.textContent = 'Rolling...';
-            resultMessage.className = 'result-message';
-            
-            rollDice();
-            
-            setTimeout(() => {
-                totalGuesses++;
-                
-                if (guess === currentRoll) {
-                    currentStreak++;
-                    if (currentStreak > bestStreak) {
-                        bestStreak = currentStreak;
-                    }
-                    
-                    resultMessage.textContent = `🎉 Correct! You guessed ${guess}!`;
-                    resultMessage.className = 'result-message correct';
-                    
-                    updateLeaderboard(username, bestStreak);
-                } else {
-                    resultMessage.textContent = `❌ Wrong! It was ${currentRoll}. Streak reset!`;
-                    resultMessage.className = 'result-message wrong';
-                    
-                    if (currentStreak > 0) {
-                        updateLeaderboard(username, currentStreak);
-                    }
-                    
-                    currentStreak = 0;
-                }
-                
-                updateStats();
-                saveGameData();
-            }, 550);
+            const leaderboard = getLeaderboard();
+            const rank = leaderboard.findIndex(u => u.username === username) + 1;
+            document.getElementById('displayRank').textContent = rank > 0 ? `#${rank}` : '-';
         }
 
         // Initialize
-        loadGameData();
-        displayLeaderboard();
-        rollDice();
+        loadAccount();
+        updateLeaderboard();
+        
+        // Create starfall effect
+        function createStarfall() {
+            const starfall = document.getElementById('starfall');
+            const numberOfStars = 50;
+            
+            for (let i = 0; i < numberOfStars; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                
+                const size = Math.random() * 3 + 1;
+                star.style.width = size + 'px';
+                star.style.height = size + 'px';
+                star.style.left = Math.random() * 100 + '%';
+                star.style.top = Math.random() * -100 + '%';
+                star.style.opacity = Math.random() * 0.5 + 0.3;
+                star.style.animationDuration = (Math.random() * 10 + 10) + 's';
+                star.style.animationDelay = Math.random() * 10 + 's';
+                
+                starfall.appendChild(star);
+            }
+        }
+        
+        createStarfall();
+        
+        // Auto-refresh leaderboard every 5 seconds
+        setInterval(() => {
+            if (document.getElementById('leaderboard').classList.contains('active')) {
+                updateLeaderboard();
+            }
+        }, 5000);
     </script>
 </body>
 </html>
