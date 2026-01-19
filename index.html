@@ -3,324 +3,487 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rikku-san AI Chatbot</title>
-    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>🎲 Dice Guess Master</title>
     <style>
-        body { 
-            margin: 0; 
-            padding: 0; 
-            overflow-x: hidden;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-        #root { width: 100%; min-height: 100vh; }
-        @keyframes fadeIn {
-          from { opacity: 0; transform: translateY(10px); }
-          to { opacity: 1; transform: translateY(0); }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
         }
-        @keyframes twinkle {
-          0%, 100% { opacity: 0.3; transform: scale(1); }
-          50% { opacity: 1; transform: scale(1.2); }
+
+        .container {
+            max-width: 1200px;
+            width: 100%;
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 20px;
         }
-        .animate-fadeIn { animation: fadeIn 0.3s ease-out; }
+
+        .game-section, .leaderboard-section {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        h1 {
+            text-align: center;
+            color: #667eea;
+            margin-bottom: 20px;
+            font-size: 2.5em;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            color: white;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .stat-label {
+            font-size: 0.9em;
+            opacity: 0.9;
+            margin-bottom: 5px;
+        }
+
+        .stat-value {
+            font-size: 2em;
+            font-weight: bold;
+        }
+
+        .dice-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin: 40px 0;
+            min-height: 150px;
+        }
+
+        .dice {
+            width: 120px;
+            height: 120px;
+            background: white;
+            border-radius: 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 4em;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+            transition: transform 0.1s;
+        }
+
+        .dice.rolling {
+            animation: roll 0.5s ease-in-out;
+        }
+
+        @keyframes roll {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(90deg) scale(1.1); }
+            50% { transform: rotate(180deg) scale(0.9); }
+            75% { transform: rotate(270deg) scale(1.1); }
+        }
+
+        .guess-buttons {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .guess-btn {
+            padding: 20px;
+            font-size: 2em;
+            border: none;
+            border-radius: 15px;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .guess-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .guess-btn:active {
+            transform: translateY(0);
+        }
+
+        .guess-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .result-message {
+            text-align: center;
+            font-size: 1.5em;
+            font-weight: bold;
+            margin: 20px 0;
+            min-height: 40px;
+            transition: all 0.3s;
+        }
+
+        .result-message.correct {
+            color: #10b981;
+            animation: bounce 0.5s;
+        }
+
+        .result-message.wrong {
+            color: #ef4444;
+            animation: shake 0.5s;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        .username-section {
+            margin-bottom: 20px;
+        }
+
+        .username-input {
+            width: 100%;
+            padding: 15px;
+            font-size: 1.1em;
+            border: 2px solid #667eea;
+            border-radius: 10px;
+            outline: none;
+        }
+
+        .username-input:focus {
+            border-color: #764ba2;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.2);
+        }
+
+        h2 {
+            color: #667eea;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .leaderboard {
+            max-height: 500px;
+            overflow-y: auto;
+        }
+
+        .leaderboard-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            border-radius: 10px;
+            color: white;
+            transition: transform 0.2s;
+        }
+
+        .leaderboard-item:hover {
+            transform: scale(1.02);
+        }
+
+        .leaderboard-item:nth-child(1) {
+            background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+            color: #333;
+        }
+
+        .leaderboard-item:nth-child(2) {
+            background: linear-gradient(135deg, #c0c0c0 0%, #e8e8e8 100%);
+            color: #333;
+        }
+
+        .leaderboard-item:nth-child(3) {
+            background: linear-gradient(135deg, #cd7f32 0%, #d4a574 100%);
+            color: #333;
+        }
+
+        .player-name {
+            font-weight: bold;
+            flex: 1;
+        }
+
+        .player-streak {
+            background: rgba(255, 255, 255, 0.3);
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+        }
+
+        .rank {
+            width: 30px;
+            height: 30px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+
+        .streak-fire {
+            display: inline-block;
+            margin-left: 5px;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+
+            .stats {
+                grid-template-columns: 1fr;
+            }
+
+            .guess-buttons {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
     </style>
 </head>
 <body>
-    <div id="root"></div>
-    <script type="text/babel">
-        const { useState, useEffect, useRef } = React;
+    <div class="container">
+        <div class="game-section">
+            <h1>🎲 Dice Guess Master</h1>
 
-        // SVG Icon Components
-        const SendIcon = () => (
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <line x1="22" y1="2" x2="11" y2="13"></line>
-            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
-          </svg>
-        );
-
-        const SparklesIcon = ({ size = 20 }) => (
-          <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M12 3l1.5 4.5L18 9l-4.5 1.5L12 15l-1.5-4.5L6 9l4.5-1.5L12 3z"></path>
-            <path d="M19 12l.75 2.25L22 15l-2.25.75L19 18l-.75-2.25L16 15l2.25-.75L19 12z"></path>
-          </svg>
-        );
-
-        const TrashIcon = ({ size = 18 }) => (
-          <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <polyline points="3 6 5 6 21 6"></polyline>
-            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-          </svg>
-        );
-
-        const HeartIcon = ({ size = 20 }) => (
-          <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
-          </svg>
-        );
-
-        function AnimeAIChatbot() {
-          const [messages, setMessages] = useState([
-            {
-              role: 'assistant',
-              content: '*adjusts glasses* Tch... I suppose I can help you. I\'m Rikku-san~ What do you need? *crosses arms* Hmph...',
-              timestamp: new Date()
-            }
-          ]);
-          const [input, setInput] = useState('');
-          const [isTyping, setIsTyping] = useState(false);
-          const [sparkles, setSparkles] = useState([]);
-          const [soundEnabled, setSoundEnabled] = useState(true);
-          const messagesEndRef = useRef(null);
-          const audioContextRef = useRef(null);
-
-          const profileImage = "https://i0.wp.com/anitrendz.net/news/wp-content/uploads/2024/12/character-awards-dolkness-yumiella.png";
-
-          const playMessageSound = () => {
-            if (!soundEnabled) return;
-            try {
-              if (!audioContextRef.current) {
-                audioContextRef.current = new (window.AudioContext || window.webkitAudioContext)();
-              }
-              const ctx = audioContextRef.current;
-              const oscillator = ctx.createOscillator();
-              const gainNode = ctx.createGain();
-              oscillator.connect(gainNode);
-              gainNode.connect(ctx.destination);
-              oscillator.frequency.value = 800;
-              oscillator.type = 'sine';
-              gainNode.gain.setValueAtTime(0.3, ctx.currentTime);
-              gainNode.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.1);
-              oscillator.start(ctx.currentTime);
-              oscillator.stop(ctx.currentTime + 0.1);
-            } catch (error) {
-              console.log('Audio not available');
-            }
-          };
-
-          const scrollToBottom = () => {
-            messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-          };
-
-          useEffect(() => {
-            scrollToBottom();
-          }, [messages]);
-
-          useEffect(() => {
-            const interval = setInterval(() => {
-              const newSparkle = {
-                id: Math.random(),
-                x: Math.random() * 100,
-                y: Math.random() * 100,
-                size: Math.random() * 3 + 1,
-                duration: Math.random() * 3 + 2,
-                delay: Math.random() * 2
-              };
-              setSparkles(prev => [...prev.slice(-20), newSparkle]);
-            }, 500);
-            return () => clearInterval(interval);
-          }, []);
-
-          const getAIResponse = async (userMessage) => {
-            try {
-              const conversationHistory = messages.slice(-6).map(msg => ({
-                role: msg.role,
-                content: msg.content
-              }));
-
-              const response = await fetch('https://api.anthropic.com/v1/messages', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                  model: 'claude-sonnet-4-20250514',
-                  max_tokens: 2000,
-                  system: 'You are Rikku-san, an intelligent AI assistant. You can: 1) Search the web for current information, 2) Generate and analyze images, 3) Perform complex calculations and logical reasoning, 4) Solve problems with step-by-step thinking. IMPORTANT: Use anime-style roleplay actions in asterisks like *sighs*, *adjusts glasses*, *looks away*, *types on keyboard*, *thinks carefully*, *blushes*, *smirks*, etc. Use tsundere expressions like "tch", "hmph~", "hm...", "...!", "*ahem*", "b-baka...". When doing calculations or logical reasoning, show your work step by step with actions. Be knowledgeable, helpful, expressive and stay in character.',
-                  messages: [...conversationHistory, { role: 'user', content: userMessage }],
-                  tools: [{ type: 'web_search_20250305', name: 'web_search' }]
-                })
-              });
-
-              if (!response.ok) throw new Error(`API error: ${response.status}`);
-              const data = await response.json();
-              
-              if (data.content.some(item => item.type === 'tool_use')) {
-                const fullResponse = data.content
-                  .map(item => {
-                    if (item.type === 'text') return item.text;
-                    if (item.type === 'tool_use') return '*typing on keyboard* Searching the web for you...';
-                    return '';
-                  })
-                  .filter(Boolean)
-                  .join('\n');
-                return fullResponse || data.content[0].text;
-              }
-              return data.content[0].text;
-            } catch (error) {
-              console.error('API Error:', error);
-              return "*sighs in frustration* Tch... something went wrong with the connection~ Try again, hmph!";
-            }
-          };
-
-          const handleSend = async () => {
-            if (!input.trim() || isTyping) return;
-            const userMessage = { role: 'user', content: input.trim(), timestamp: new Date() };
-            setMessages(prev => [...prev, userMessage]);
-            setInput('');
-            setIsTyping(true);
-            playMessageSound();
-
-            const aiResponse = await getAIResponse(userMessage.content);
-            setTimeout(() => {
-              setMessages(prev => [...prev, { role: 'assistant', content: aiResponse, timestamp: new Date() }]);
-              setIsTyping(false);
-              playMessageSound();
-            }, 800);
-          };
-
-          const handleKeyPress = (e) => {
-            if (e.key === 'Enter' && !e.shiftKey) {
-              e.preventDefault();
-              handleSend();
-            }
-          };
-
-          const clearChat = () => {
-            setMessages([{
-              role: 'assistant',
-              content: '*stretches arms* Hm~ Chat cleared. What do you need help with now? *leans forward attentively*',
-              timestamp: new Date()
-            }]);
-          };
-
-          return (
-            <div className="min-h-screen bg-black relative overflow-hidden">
-              <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                {sparkles.map(sparkle => (
-                  <div key={sparkle.id} className="absolute bg-white rounded-full"
-                    style={{
-                      left: `${sparkle.x}%`, top: `${sparkle.y}%`,
-                      width: `${sparkle.size}px`, height: `${sparkle.size}px`,
-                      animation: `twinkle ${sparkle.duration}s ease-in-out infinite`,
-                      animationDelay: `${sparkle.delay}s`, opacity: 0.6
-                    }} />
-                ))}
-              </div>
-
-              <div className="absolute inset-0 overflow-hidden pointer-events-none">
-                <div className="absolute top-0 left-1/4 w-96 h-96 bg-purple-600/5 rounded-full blur-3xl animate-pulse"></div>
-                <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-fuchsia-600/5 rounded-full blur-3xl animate-pulse" style={{animationDelay: '1s'}}></div>
-              </div>
-
-              <div className="container mx-auto max-w-4xl min-h-screen flex flex-col p-2 sm:p-4 relative z-10">
-                
-                <div className="rounded-t-3xl p-4 sm:p-6 shadow-2xl bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 border-b border-fuchsia-500/20">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3 sm:gap-4">
-                      <div className="relative">
-                        <img src={profileImage} alt="Rikku-san"
-                          className="w-12 h-12 sm:w-16 sm:h-16 rounded-full shadow-xl border-2 border-fuchsia-500/50 object-cover bg-black" />
-                        <div className="absolute -bottom-1 -right-1 w-4 h-4 sm:w-5 sm:h-5 bg-green-500 rounded-full border-2 border-black animate-pulse"></div>
-                      </div>
-                      <div>
-                        <h1 className="text-xl sm:text-2xl font-bold text-white flex items-center gap-2">
-                          Rikku-san
-                          <span className="text-fuchsia-300"><SparklesIcon size={20} /></span>
-                        </h1>
-                        <p className="text-fuchsia-200 text-xs sm:text-sm font-medium">AI Assistant</p>
-                        <p className="text-fuchsia-300 text-xs hidden sm:block">Web Search • Image Gen • Calculator</p>
-                      </div>
-                    </div>
-                    
-                    <div className="flex gap-1 sm:gap-2">
-                      <button onClick={() => setSoundEnabled(!soundEnabled)}
-                        className={`p-2 sm:p-3 rounded-full transition-all backdrop-blur-sm border ${
-                          soundEnabled ? 'bg-fuchsia-600/40 border-fuchsia-400/50' : 'bg-black/40 border-fuchsia-500/30'
-                        }`} title="Toggle Sound">
-                        <span className="text-fuchsia-300"><SparklesIcon size={18} /></span>
-                      </button>
-                      <button onClick={clearChat}
-                        className="p-2 sm:p-3 rounded-full bg-black/40 hover:bg-black/60 transition-all backdrop-blur-sm border border-fuchsia-500/30 hover:border-fuchsia-400/50"
-                        title="Clear Chat">
-                        <span className="text-fuchsia-300"><TrashIcon size={18} /></span>
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4 bg-black/60 backdrop-blur-sm border-x border-fuchsia-900/20"
-                  style={{ minHeight: '400px', maxHeight: 'calc(100vh - 300px)' }}>
-                  {messages.map((message, index) => (
-                    <div key={index} className={`flex ${message.role === 'user' ? 'justify-end' : 'justify-start'} animate-fadeIn`}>
-                      <div className={`max-w-[85%] sm:max-w-[80%] ${message.role === 'user' ? 'order-2' : 'order-1'}`}>
-                        <div className={`rounded-2xl p-4 shadow-xl border ${
-                          message.role === 'user'
-                            ? 'bg-gradient-to-br from-gray-800 to-gray-900 text-white border-gray-700/50'
-                            : 'bg-gradient-to-br from-violet-600 via-purple-600 to-fuchsia-600 text-white border-fuchsia-400/30'
-                        }`}>
-                          <p className="whitespace-pre-wrap break-words leading-relaxed">{message.content}</p>
-                          <p className="text-xs mt-2 text-white/50">
-                            {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                          </p>
-                        </div>
-                      </div>
-                      
-                      <div className={`w-10 h-10 rounded-full flex items-center justify-center border-2 overflow-hidden ${
-                        message.role === 'user' 
-                          ? 'order-1 ml-2 bg-gray-800 border-gray-600/50' 
-                          : 'order-2 mr-2 border-fuchsia-500/50 bg-black'
-                      }`}>
-                        {message.role === 'user' ? (
-                          <span className="text-gray-300"><HeartIcon size={20} /></span>
-                        ) : (
-                          <img src={profileImage} alt="Rikku-san" className="w-full h-full object-cover" />
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                  
-                  {isTyping && (
-                    <div className="flex justify-start animate-fadeIn">
-                      <div className="w-10 h-10 rounded-full flex items-center justify-center mr-2 border-2 border-fuchsia-500/50 overflow-hidden bg-black">
-                        <img src={profileImage} alt="Rikku-san" className="w-full h-full object-cover" />
-                      </div>
-                      <div className="rounded-2xl p-4 shadow-xl bg-gradient-to-br from-violet-600 via-purple-600 to-fuchsia-600 border border-fuchsia-400/30">
-                        <div className="flex gap-2">
-                          <div className="w-3 h-3 bg-white rounded-full animate-bounce"></div>
-                          <div className="w-3 h-3 bg-white rounded-full animate-bounce" style={{animationDelay: '0.1s'}}></div>
-                          <div className="w-3 h-3 bg-white rounded-full animate-bounce" style={{animationDelay: '0.2s'}}></div>
-                        </div>
-                      </div>
-                    </div>
-                  )}
-                  <div ref={messagesEndRef} />
-                </div>
-
-                <div className="rounded-b-3xl p-3 sm:p-4 shadow-2xl bg-black/80 backdrop-blur-md border border-t-0 border-fuchsia-900/20">
-                  <div className="flex gap-2 sm:gap-3">
-                    <input type="text" value={input}
-                      onChange={(e) => setInput(e.target.value)}
-                      onKeyPress={handleKeyPress}
-                      placeholder="Type your message..."
-                      className="flex-1 px-4 sm:px-6 py-2 sm:py-3 rounded-full outline-none transition-all bg-gray-900/80 text-white placeholder-gray-500 focus:ring-2 focus:ring-fuchsia-500/50 border border-fuchsia-800/30 text-sm sm:text-base" />
-                    <button onClick={handleSend}
-                      disabled={!input.trim() || isTyping}
-                      className={`p-3 rounded-full transition-all ${
-                        input.trim() && !isTyping
-                          ? 'bg-gradient-to-r from-violet-600 via-purple-600 to-fuchsia-600 hover:scale-110 shadow-lg shadow-fuchsia-500/30'
-                          : 'bg-gray-800/50 border border-gray-700'
-                      } disabled:cursor-not-allowed`}>
-                      <span className="text-white"><SendIcon /></span>
-                    </button>
-                  </div>
-                </div>
-              </div>
+            <div class="username-section">
+                <input type="text" class="username-input" id="usernameInput" placeholder="Enter your username..." maxlength="20">
             </div>
-          );
+
+            <div class="stats">
+                <div class="stat-card">
+                    <div class="stat-label">Current Streak</div>
+                    <div class="stat-value" id="currentStreak">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Best Streak</div>
+                    <div class="stat-value" id="bestStreak">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Total Guesses</div>
+                    <div class="stat-value" id="totalGuesses">0</div>
+                </div>
+            </div>
+
+            <div class="dice-container">
+                <div class="dice" id="dice">🎲</div>
+            </div>
+
+            <div class="result-message" id="resultMessage"></div>
+
+            <div class="guess-buttons">
+                <button class="guess-btn" onclick="makeGuess(1)">1️⃣</button>
+                <button class="guess-btn" onclick="makeGuess(2)">2️⃣</button>
+                <button class="guess-btn" onclick="makeGuess(3)">3️⃣</button>
+                <button class="guess-btn" onclick="makeGuess(4)">4️⃣</button>
+                <button class="guess-btn" onclick="makeGuess(5)">5️⃣</button>
+                <button class="guess-btn" onclick="makeGuess(6)">6️⃣</button>
+            </div>
+        </div>
+
+        <div class="leaderboard-section">
+            <h2>🏆 Leaderboard</h2>
+            <div class="leaderboard" id="leaderboard"></div>
+        </div>
+    </div>
+
+    <script>
+        const diceEmojis = ['⚀', '⚁', '⚂', '⚃', '⚄', '⚅'];
+        let currentRoll = 0;
+        let currentStreak = 0;
+        let bestStreak = 0;
+        let totalGuesses = 0;
+        let isRolling = false;
+
+        // Load data from memory
+        function loadGameData() {
+            const data = {
+                currentStreak: parseInt(sessionStorage.getItem('currentStreak')) || 0,
+                bestStreak: parseInt(sessionStorage.getItem('bestStreak')) || 0,
+                totalGuesses: parseInt(sessionStorage.getItem('totalGuesses')) || 0,
+                username: sessionStorage.getItem('username') || ''
+            };
+            
+            currentStreak = data.currentStreak;
+            bestStreak = data.bestStreak;
+            totalGuesses = data.totalGuesses;
+            
+            if (data.username) {
+                document.getElementById('usernameInput').value = data.username;
+            }
+            
+            updateStats();
         }
 
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(React.createElement(AnimeAIChatbot));
+        // Save data to memory
+        function saveGameData() {
+            sessionStorage.setItem('currentStreak', currentStreak);
+            sessionStorage.setItem('bestStreak', bestStreak);
+            sessionStorage.setItem('totalGuesses', totalGuesses);
+            
+            const username = document.getElementById('usernameInput').value.trim();
+            if (username) {
+                sessionStorage.setItem('username', username);
+            }
+        }
+
+        // Load/Save leaderboard
+        function loadLeaderboard() {
+            const saved = sessionStorage.getItem('leaderboard');
+            return saved ? JSON.parse(saved) : [];
+        }
+
+        function saveLeaderboard(leaderboard) {
+            sessionStorage.setItem('leaderboard', JSON.stringify(leaderboard));
+        }
+
+        function updateLeaderboard(username, streak) {
+            if (!username) return;
+            
+            let leaderboard = loadLeaderboard();
+            
+            const existingIndex = leaderboard.findIndex(p => p.name === username);
+            
+            if (existingIndex >= 0) {
+                if (streak > leaderboard[existingIndex].streak) {
+                    leaderboard[existingIndex].streak = streak;
+                }
+            } else {
+                leaderboard.push({ name: username, streak: streak });
+            }
+            
+            leaderboard.sort((a, b) => b.streak - a.streak);
+            leaderboard = leaderboard.slice(0, 10);
+            
+            saveLeaderboard(leaderboard);
+            displayLeaderboard();
+        }
+
+        function displayLeaderboard() {
+            const leaderboard = loadLeaderboard();
+            const container = document.getElementById('leaderboard');
+            
+            if (leaderboard.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #999;">No players yet. Be the first!</p>';
+                return;
+            }
+            
+            container.innerHTML = leaderboard.map((player, index) => {
+                const fire = player.streak >= 10 ? '🔥' : player.streak >= 5 ? '⭐' : '';
+                return `
+                    <div class="leaderboard-item">
+                        <span class="rank">${index + 1}</span>
+                        <span class="player-name">${player.name}</span>
+                        <span class="player-streak">${player.streak}<span class="streak-fire">${fire}</span></span>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function updateStats() {
+            document.getElementById('currentStreak').textContent = currentStreak;
+            document.getElementById('bestStreak').textContent = bestStreak;
+            document.getElementById('totalGuesses').textContent = totalGuesses;
+        }
+
+        function rollDice() {
+            const dice = document.getElementById('dice');
+            dice.classList.add('rolling');
+            
+            let rollCount = 0;
+            const rollInterval = setInterval(() => {
+                dice.textContent = diceEmojis[Math.floor(Math.random() * 6)];
+                rollCount++;
+                
+                if (rollCount >= 10) {
+                    clearInterval(rollInterval);
+                    currentRoll = Math.floor(Math.random() * 6) + 1;
+                    dice.textContent = diceEmojis[currentRoll - 1];
+                    dice.classList.remove('rolling');
+                    isRolling = false;
+                }
+            }, 50);
+        }
+
+        function makeGuess(guess) {
+            if (isRolling) return;
+            
+            const username = document.getElementById('usernameInput').value.trim();
+            if (!username) {
+                alert('Please enter your username first!');
+                document.getElementById('usernameInput').focus();
+                return;
+            }
+            
+            isRolling = true;
+            const resultMessage = document.getElementById('resultMessage');
+            resultMessage.textContent = 'Rolling...';
+            resultMessage.className = 'result-message';
+            
+            rollDice();
+            
+            setTimeout(() => {
+                totalGuesses++;
+                
+                if (guess === currentRoll) {
+                    currentStreak++;
+                    if (currentStreak > bestStreak) {
+                        bestStreak = currentStreak;
+                    }
+                    
+                    resultMessage.textContent = `🎉 Correct! You guessed ${guess}!`;
+                    resultMessage.className = 'result-message correct';
+                    
+                    updateLeaderboard(username, bestStreak);
+                } else {
+                    resultMessage.textContent = `❌ Wrong! It was ${currentRoll}. Streak reset!`;
+                    resultMessage.className = 'result-message wrong';
+                    
+                    if (currentStreak > 0) {
+                        updateLeaderboard(username, currentStreak);
+                    }
+                    
+                    currentStreak = 0;
+                }
+                
+                updateStats();
+                saveGameData();
+            }, 550);
+        }
+
+        // Initialize
+        loadGameData();
+        displayLeaderboard();
+        rollDice();
     </script>
 </body>
 </html>
